@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "name": "project-dashboard",
-  "buildCommand": null,
-  "outputDirectory": ".",
   "routes": [
     {
       "src": "/",
@@ -20,27 +17,9 @@
       ]
     },
     {
-      "source": "/styles.css",
+      "source": "/(styles\\.css|app\\.js|favicon\\.svg|apple-touch-icon\\.png)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/app.js",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/favicon.svg",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/apple-touch-icon.png",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     }
   ]
