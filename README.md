@@ -2,7 +2,7 @@
 
 A local-first project manager for developers. Track Supabase, GitHub, deployment, and environment variables for every project — all saved privately in your browser's localStorage. No server, no account, no tracking.
 
-🔗 **Live demo:** _[add your Vercel URL here after deploying]_
+🔗 **Live demo:** [https://project-dashboard-alpha-nine.vercel.app](https://project-dashboard-alpha-nine.vercel.app)
 
 ---
 
