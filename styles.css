@@ -425,15 +425,37 @@ textarea { resize: vertical; min-height: 64px; }
   -webkit-box-orient: vertical;
   overflow: hidden; min-height: 2.6em;
 }
-.pc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
-.pc-chip {
-  font-size: 10.5px; font-weight: 700; border: 1.5px solid var(--ink);
-  padding: 2px 8px; border-radius: 20px;
+.pc-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; margin-bottom: 8px; }
+.badge {
+  font-size: 11px; font-weight: 600; border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: 6px;
   display: inline-flex; align-items: center; gap: 4px;
-  background: var(--paper); color: var(--ink);
+  background: var(--paper); color: var(--ink); white-space: nowrap;
 }
-.pc-chip.off  { opacity: 0.3; }
-.pc-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); }
+.badge svg { opacity: 0.8; }
+.badge-off { opacity: 0.4; filter: grayscale(1); }
+.badge-green { color: var(--green); border-color: rgba(61, 184, 112, 0.3); background: rgba(61, 184, 112, 0.05); }
+.badge-green svg { color: var(--green); opacity: 1; }
+.badge-gray { color: var(--ink); border-color: var(--border); background: var(--paper); }
+.badge-gray svg { color: var(--ink); opacity: 0.8; }
+.badge-blue { color: var(--blue); border-color: rgba(91, 143, 212, 0.3); background: rgba(91, 143, 212, 0.05); }
+.badge-blue svg { color: var(--blue); opacity: 1; }
+.badge-red { color: var(--red); border-color: rgba(224, 82, 82, 0.3); background: rgba(224, 82, 82, 0.05); }
+.badge-red svg { color: var(--red); opacity: 1; }
+.badge-orange { color: var(--orange); border-color: rgba(249, 113, 64, 0.3); background: rgba(249, 113, 64, 0.05); }
+.badge-orange svg { color: var(--orange); opacity: 1; }
+
+/* Dark mode overrides for badges */
+:root[data-theme="dark"] .badge-green { border-color: rgba(61, 184, 112, 0.5); background: rgba(61, 184, 112, 0.1); }
+:root[data-theme="dark"] .badge-blue  { border-color: rgba(91, 143, 212, 0.5); background: rgba(91, 143, 212, 0.1); }
+:root[data-theme="dark"] .badge-red   { border-color: rgba(224, 82, 82, 0.5); background: rgba(224, 82, 82, 0.1); }
+:root[data-theme="dark"] .badge-orange{ border-color: rgba(249, 113, 64, 0.5); background: rgba(249, 113, 64, 0.1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-green { border-color: rgba(61, 184, 112, 0.5); background: rgba(61, 184, 112, 0.1); }
+  :root:not([data-theme="light"]) .badge-blue  { border-color: rgba(91, 143, 212, 0.5); background: rgba(91, 143, 212, 0.1); }
+  :root:not([data-theme="light"]) .badge-red   { border-color: rgba(224, 82, 82, 0.5); background: rgba(224, 82, 82, 0.1); }
+  :root:not([data-theme="light"]) .badge-orange{ border-color: rgba(249, 113, 64, 0.5); background: rgba(249, 113, 64, 0.1); }
+}
 .pc-meta    { font-size: 11.5px; color: var(--muted); margin-top: auto; padding-top: 8px; border-top: 1.5px dashed rgba(20,20,20,.2); }
 .pc-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .pc-actions .btn-icon { width: 30px; height: 30px; font-size: 12px; }

@@ -92,6 +92,7 @@
       name: (name || '').trim(),
       description: (description || '').trim(),
       status: status || 'active',
+      gmail: '',
       createdAt: now,
       updatedAt: now,
       supabase:    { email: '', url: '', anonKey: '' },
@@ -320,16 +321,29 @@
 
   function projectCardHtml(p) {
     var st       = STATUS[p.status] || STATUS.active;
-    var envCount = p.envVariables.filter(function (v) { return v.key.trim() !== ''; }).length;
-    var chips    = [
-      { label: 'Supabase', on: !!p.supabase.url },
-      { label: 'GitHub',   on: !!p.github.repoUrl },
-      { label: 'Deploy',   on: !!p.deployment.liveUrl }
-    ].map(function (c) {
-      return '<span class="pc-chip' + (c.on ? '' : ' off') + '" aria-label="' +
-             c.label + (c.on ? ' connected' : ' not connected') + '">' +
-             '<span class="dot" aria-hidden="true"></span>' + escapeHtml(c.label) + '</span>';
-    }).join('');
+    var badges = [];
+    var svgDb    = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>';
+    var svgGit   = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><circle cx="18" cy="6" r="3"></circle><path d="M6 9v6"></path><path d="M18 9v2c0 1.1-.9 2-2 2h-4"></path><path d="M6 12h4c1.1 0 2 .9 2 2v1"></path></svg>';
+    var svgGlobe = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
+    var svgMail  = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>';
+    var svgKey   = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="m21 2-9.6 9.6"></path><path d="m15.5 7.5 3 3L22 7l-3-3"></path></svg>';
+
+    var hasSb = p.supabase.url || p.supabase.anonKey || p.supabase.email;
+    badges.push('<span class="badge ' + (hasSb ? 'badge-green' : 'badge-off') + '" aria-label="Supabase ' + (hasSb ? 'configured' : 'not configured') + '">' + svgDb + ' Supabase</span>');
+    var hasGit = p.github.repoUrl || p.github.account;
+    badges.push('<span class="badge ' + (hasGit ? 'badge-gray' : 'badge-off') + '" aria-label="GitHub ' + (hasGit ? 'configured' : 'not configured') + '">' + svgGit + ' GitHub</span>');
+    var hasDeploy = p.deployment.liveUrl || p.deployment.platform;
+    badges.push('<span class="badge ' + (hasDeploy ? 'badge-blue' : 'badge-off') + '" aria-label="Deployment ' + (hasDeploy ? 'configured' : 'not configured') + '">' + svgGlobe + ' Deploy</span>');
+    if (p.gmail && p.gmail.trim() !== '') {
+      badges.push('<span class="badge badge-red" aria-label="Gmail configured">' + svgMail + ' ' + escapeHtml(p.gmail.trim()) + '</span>');
+    }
+    var envCount = p.envVariables.length;
+    if (envCount > 0) {
+      badges.push('<span class="badge badge-orange" aria-label="' + envCount + ' environment variables">' + svgKey + ' ' + envCount + ' env vars</span>');
+    } else {
+      badges.push('<span class="badge badge-off" aria-label="0 environment variables">' + svgKey + ' 0 env vars</span>');
+    }
+    var chipsHtml = '<div class="pc-badges">' + badges.join('') + '</div>';
 
     return (
       '<article class="project-card" data-id="' + p.id + '" tabindex="0" role="button" aria-label="Open project: ' + escapeHtml(p.name) + '">' +
@@ -340,11 +354,7 @@
           '</span>' +
         '</div>' +
         '<p class="pc-desc">' + (p.description ? escapeHtml(p.description) : '<em style="color:var(--muted)">No description yet</em>') + '</p>' +
-        '<div class="pc-badges">' + chips +
-          '<span class="pc-chip" aria-label="' + envCount + ' environment variable' + (envCount === 1 ? '' : 's') + '">' +
-            '<span class="dot" aria-hidden="true"></span>' + envCount + ' env var' + (envCount === 1 ? '' : 's') +
-          '</span>' +
-        '</div>' +
+        chipsHtml +
         '<div class="pc-meta" data-ts="' + p.updatedAt + '">Updated ' + relativeTime(p.updatedAt) + '</div>' +
         '<div class="pc-actions">' +
           '<button class="btn-icon" data-action="clone"  data-id="' + p.id + '" title="Duplicate project" aria-label="Duplicate project: ' + escapeHtml(p.name) + '" type="button">⧉</button>' +
@@ -437,6 +447,7 @@
     var src = findProject(id);
     if (!src) return;
     var copy = blankProject(src.name + ' (copy)', src.description, src.status);
+    copy.gmail        = src.gmail;
     copy.supabase     = Object.assign({}, src.supabase);
     copy.github       = Object.assign({}, src.github);
     copy.deployment   = Object.assign({}, src.deployment);
@@ -661,6 +672,7 @@
     document.getElementById('projNameError').classList.remove('show');
     document.getElementById('projStatus').value = p.status || 'active';
     document.getElementById('projDesc').value  = p.description || '';
+    document.getElementById('projGmail').value = p.gmail || '';
 
     document.getElementById('sbEmail').value  = p.supabase.email   || '';
     document.getElementById('sbUrl').value    = p.supabase.url     || '';
@@ -684,6 +696,7 @@
   /* Field bindings */
   bindField('projName',    function (p, v) { p.name = v; });
   bindField('projDesc',    function (p, v) { p.description = v; });
+  bindField('projGmail',   function (p, v) { p.gmail = v; });
   bindField('sbEmail',     function (p, v) { p.supabase.email = v; });
   bindField('sbUrl',       function (p, v) { p.supabase.url = v; });
   bindField('sbKey',       function (p, v) { p.supabase.anonKey = v; });
@@ -822,6 +835,7 @@
       projectName:        p.name,
       projectDescription: p.description,
       status:             p.status,
+      gmail:              p.gmail,
       supabase:           p.supabase,
       github:             p.github,
       deployment:         p.deployment,
@@ -897,9 +911,10 @@
       p.name        = data.projectName        || p.name;
       p.description = data.projectDescription || '';
       p.status      = STATUS[data.status]     ? data.status : p.status;
+      p.gmail       = data.gmail              || '';
       p.supabase    = Object.assign({ email: '', url: '', anonKey: '' }, data.supabase   || {});
-      p.github      = Object.assign({ repoUrl: '', mainBranch: '', account: '' }, data.github || {});
-      p.deployment  = Object.assign({ platform: '', liveUrl: '', account: '' }, data.deployment || {});
+      p.github      = Object.assign({ repoUrl: '', mainBranch: '', account: '' },  data.github || {});
+      p.deployment  = Object.assign({ platform: '', liveUrl: '', account: '' },    data.deployment || {});
       p.envVariables = (data.envVariables || []).map(function (v) { return { id: ++rowSeq, key: v.key || '', value: v.value || '' }; });
       p.updatedAt   = Date.now();
       persist(); renderDetail(p); close();
