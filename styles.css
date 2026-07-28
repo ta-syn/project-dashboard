@@ -115,6 +115,11 @@ img { max-width: 100%; }
 /* ============================================================
    TOP IDENTITY BAR
 ============================================================ */
+header {
+  position: sticky;
+  top: 12px;
+  z-index: 100;
+}
 .topbar {
   background: var(--paper);
   border: 2px solid var(--ink);
