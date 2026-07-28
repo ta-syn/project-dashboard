@@ -283,7 +283,7 @@
     var strip = document.getElementById('statsStrip');
     strip.innerHTML =
       '<div class="stat-tile"><div class="n">' + s.total     + '</div><div class="l">Total projects</div></div>' +
-      '<div class="stat-tile"><div class="n">' + s.active    + '</div><div class="l">Active</div></div>' +
+      '<div class="stat-tile active-tile"><div class="n">' + s.active    + '</div><div class="l">Active</div></div>' +
       '<div class="stat-tile"><div class="n">' + s.envTotal  + '</div><div class="l">Env variables</div></div>' +
       '<div class="stat-tile"><div class="n">' + s.configured + '</div><div class="l">With integrations</div></div>';
   }
