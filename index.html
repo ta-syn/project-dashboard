@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Dashboard</title>
+  <meta name="description" content="Manage every project in one place — Supabase, GitHub, deployment, and environment variables. Private and local, no server needed.">
+
+  <!-- Favicon -->
+  <link rel="icon"             type="image/svg+xml"  href="favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180"        href="apple-touch-icon.png">
+  <meta name="theme-color"     content="#EF5C27">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Anti-flash: apply saved theme before first paint -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('pdTheme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Skip link for keyboard / screen-reader users -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Toast notification (aria-live region) -->
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="wrap">
+
+    <!-- ============ HEADER ============ -->
+    <header>
+      <div class="topbar">
+        <div class="brand" aria-label="Project Dashboard home">
+          <div class="brand-icon" aria-hidden="true">
+            <!-- Custom SVG logo: grid of squares -->
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1"    y="1"    width="7"   height="7"   rx="1.5"/>
+              <rect x="12"   y="1"    width="7"   height="7"   rx="1.5"/>
+              <rect x="1"    y="12"   width="7"   height="7"   rx="1.5"/>
+              <rect x="12"   y="12"   width="7"   height="3.5" rx="1.5"/>
+              <rect x="15.5" y="15.5" width="3.5" height="3.5" rx="1" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="label" id="brandLabel">Project Dashboard</span>
+            <span class="sub"   id="brandSub">Manage every project in one place</span>
+          </div>
+        </div>
+        <!-- Dark/light mode toggle -->
+        <button class="btn-icon theme-toggle" id="themeToggle"
+          aria-label="Switch to dark mode"
+          title="Toggle dark / light mode">🌙</button>
+        <!-- New Project button injected here by JS -->
+        <div class="topbar-right" id="topbarRight"></div>
+      </div>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <main id="main-content">
+
+      <!-- ============ DASHBOARD VIEW ============ -->
+      <div class="view" id="dashboardView">
+
+        <div class="hero">
+          <h1>Your projects,<br>in one hard-edged place.</h1>
+          <p>Create a project for each app you're building. Everything — Supabase, GitHub, deployment, environment variables — stays organized per project and saved right in this browser.</p>
+        </div>
+
+        <!-- Stats strip — populated by JS -->
+        <div class="stats-strip" id="statsStrip" aria-label="Portfolio statistics"></div>
+
+        <!-- Toolbar: search, filter, sort -->
+        <div class="toolbar" role="search" aria-label="Filter and sort projects">
+          <div class="search-box">
+            <span class="s-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="search"
+              id="searchInput"
+              aria-label="Search projects by name or description"
+              placeholder="Search by name or description…">
+          </div>
+
+          <select id="statusFilter" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="completed">Completed</option>
+            <option value="archived">Archived</option>
+          </select>
+
+          <select id="sortBy" aria-label="Sort projects">
+            <option value="updated">Sort: Recently updated</option>
+            <option value="created">Sort: Recently created</option>
+            <option value="name">Sort: Name A–Z</option>
+            <option value="status">Sort: Status</option>
+          </select>
+
+          <button class="btn btn-primary" id="newProjectBtn" aria-label="Create a new project">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="7" y1="1" x2="7" y2="13"/>
+              <line x1="1" y1="7" x2="13" y2="7"/>
+            </svg>
+            New Project
+          </button>
+        </div>
+
+        <!-- Project cards — populated by JS -->
+        <div class="projects-grid" id="projectsGrid" aria-label="Your projects"></div>
+
+        <hr class="section-divider">
+
+        <!-- Backup / restore -->
+        <section aria-labelledby="backupHeading" class="card" id="backupCard">
+          <h2 id="backupHeading">Backup all data</h2>
+          <p style="font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.6;">
+            Everything is stored in this browser's local storage only. Export a full backup to keep it safe, or restore from a previous export.
+          </p>
+          <div class="actions">
+            <button class="btn btn-yellow" id="exportAllBtn">⬇ Export all projects</button>
+            <button class="btn btn-ghost"  id="importAllBtn">⬆ Import backup</button>
+            <input type="file" id="importAllFile" accept="application/json" aria-label="Import backup JSON file">
+          </div>
+          <div class="status-line" id="backupStatusLine" role="status" aria-live="polite"></div>
+        </section>
+
+        <footer class="site-footer">
+          <p>Built with plain HTML, CSS &amp; JS — no server, no tracking. Data lives only in this browser.</p>
+        </footer>
+      </div><!-- /#dashboardView -->
+
+
+      <!-- ============ PROJECT DETAIL VIEW ============ -->
+      <div class="view hidden" id="detailView">
+
+        <button class="btn-link" id="backBtn" aria-label="Back to all projects">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 2 4 7 9 12"></polyline>
+          </svg>
+          All projects
+        </button>
+
+        <!-- Detail header -->
+        <div class="detail-header">
+          <div>
+            <div class="detail-title-row">
+              <h1 id="detailName">Project</h1>
+              <span id="detailStatusPill"></span>
+            </div>
+            <div class="detail-sub" id="detailSub"></div>
+          </div>
+          <div class="actions" style="margin-top:0;">
+            <button class="btn btn-ghost"  id="duplicateProjectBtn" aria-label="Duplicate this project">⧉ Duplicate</button>
+            <button class="btn btn-ghost"  id="exportOneBtn"        aria-label="Export this project as JSON">⬇ Export JSON</button>
+            <button class="btn btn-danger" id="deleteProjectBtn"    aria-label="Delete this project">Delete project</button>
+          </div>
+        </div>
+
+        <!-- Two-column grid -->
+        <div class="grid">
+
+          <!-- LEFT COLUMN -->
+          <div>
+            <!-- Project basics -->
+            <section class="card" aria-labelledby="secProject">
+              <h2 id="secProject">
+                Project
+                <span class="save-indicator" id="saveIndicator" aria-live="polite">✓ Saved</span>
+              </h2>
+
+              <label for="projName">
+                Project name
+                <span class="req" aria-hidden="true">*</span>
+                <span class="sr-only">(required)</span>
+              </label>
+              <input type="text" id="projName" placeholder="e.g. Bagan Bazaar App" maxlength="80" autocomplete="off">
+              <div class="field-error" id="projNameError" role="alert">Project name can't be empty.</div>
+
+              <label for="projStatus">Status</label>
+              <select id="projStatus" aria-label="Project status">
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+                <option value="archived">Archived</option>
+              </select>
+
+              <label for="projDesc">Short description</label>
+              <textarea id="projDesc" placeholder="What this project does…" maxlength="400"></textarea>
+            </section>
+
+            <!-- Supabase -->
+            <section class="card" aria-labelledby="secSupabase">
+              <h2 id="secSupabase">Supabase account</h2>
+
+              <label for="sbEmail">Gmail this Supabase project is under</label>
+              <input type="email" id="sbEmail" placeholder="yourname@gmail.com" autocomplete="off">
+
+              <label for="sbUrl">Project URL</label>
+              <input type="url" id="sbUrl" class="mono" placeholder="https://xxxxx.supabase.co" autocomplete="off">
+
+              <label for="sbKey">Anon / public API key</label>
+              <div class="row-inline">
+                <input type="password" id="sbKey" class="mono" placeholder="eyJhbGciOi…" autocomplete="off" aria-describedby="sbKeyHint">
+                <button class="btn-icon" id="toggleKey" title="Show/hide key" aria-label="Show or hide Supabase API key" type="button">👁</button>
+              </div>
+              <div class="field-hint" id="sbKeyHint">
+                Stored as plain text in this browser's local storage — avoid on shared computers.
+              </div>
+            </section>
+
+            <!-- GitHub -->
+            <section class="card" aria-labelledby="secGithub">
+              <h2 id="secGithub">GitHub repo</h2>
+
+              <label for="ghRepo">Repository URL</label>
+              <input type="url" id="ghRepo" class="mono" placeholder="https://github.com/username/project" autocomplete="off">
+
+              <label for="ghBranch">Main branch</label>
+              <input type="text" id="ghBranch" class="mono" placeholder="main" autocomplete="off">
+
+              <label for="ghOwner">GitHub account (email or username)</label>
+              <input type="text" id="ghOwner" placeholder="yourname@gmail.com" autocomplete="off">
+            </section>
+
+            <!-- Deployment -->
+            <section class="card" aria-labelledby="secDeploy">
+              <h2 id="secDeploy">Deployment</h2>
+
+              <label for="deployPlatform">Platform</label>
+              <select id="deployPlatform" aria-label="Deployment platform">
+                <option value="">Select platform</option>
+                <option value="Vercel">Vercel</option>
+                <option value="Netlify">Netlify</option>
+                <option value="Render">Render</option>
+                <option value="Railway">Railway</option>
+                <option value="Fly.io">Fly.io</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <label for="deployUrl">Live URL</label>
+              <input type="url" id="deployUrl" class="mono" placeholder="https://your-project.vercel.app" autocomplete="off">
+
+              <label for="deployEmail">Deployment account (email)</label>
+              <input type="email" id="deployEmail" placeholder="yourname@gmail.com" autocomplete="off">
+            </section>
+          </div><!-- /LEFT COLUMN -->
+
+          <!-- RIGHT COLUMN -->
+          <div>
+            <!-- Environment variables -->
+            <section class="card" aria-labelledby="secEnv">
+              <h2 id="secEnv">Environment variables</h2>
+              <div id="envList" aria-label="Environment variable list"></div>
+              <div class="env-empty" id="envEmptyMsg">No variables yet — add your first one below.</div>
+              <div class="actions">
+                <button class="btn btn-ghost btn-sm" id="addEnvBtn" type="button">+ Add variable</button>
+              </div>
+              <div class="field-hint">Values are masked on screen — stored as plain text in this browser's local storage.</div>
+            </section>
+
+            <!-- Env variable count summary -->
+            <div class="summary" aria-label="Environment variable summary">
+              <div class="label-sm">Env variables in project</div>
+              <div class="big" id="envCount" aria-live="polite">0</div>
+              <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="envBarWrapper">
+                <div class="bar-fill" id="envBar"></div>
+              </div>
+              <div class="summary-sub" id="envSummarySub">Add variables to see them tracked here.</div>
+            </div>
+          </div><!-- /RIGHT COLUMN -->
+
+        </div><!-- /.grid -->
+
+        <!-- Single-project import -->
+        <section class="card" aria-labelledby="secImport">
+          <h2 id="secImport">Import into this project</h2>
+          <p style="font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.6;">
+            Restore this project's fields from a JSON file exported earlier. This replaces the current values for this project only.
+          </p>
+          <div class="actions">
+            <button class="btn btn-yellow" id="importBtn" type="button">⬆ Import JSON</button>
+            <input type="file" id="importFile" accept="application/json" aria-label="Import single project JSON file">
+          </div>
+          <div class="status-line" id="statusLine" role="status" aria-live="polite"></div>
+        </section>
+
+      </div><!-- /#detailView -->
+
+    </main><!-- /#main-content -->
+
+  </div><!-- /.wrap -->
+
+  <!-- Application logic -->
+  <script src="app.js"></script>
+
+</body>
+</html>
