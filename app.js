@@ -606,6 +606,19 @@
 
   document.getElementById('backBtn').addEventListener('click', function () { showDashboard(); });
 
+  document.getElementById('btnUpdateProject').addEventListener('click', function () {
+    var p = findProject(currentProjectId);
+    if (p && !p.name.trim()) {
+      showToast('Project name is required.', true);
+      document.getElementById('projName').classList.add('invalid');
+      document.getElementById('projNameError').classList.add('show');
+      document.getElementById('projName').focus();
+      return;
+    }
+    showToast('Project updated successfully!');
+    showDashboard();
+  });
+
   document.getElementById('deleteProjectBtn').addEventListener('click', function () {
     if (currentProjectId) openDeleteConfirm(currentProjectId);
   });
