@@ -112,13 +112,14 @@ img { max-width: 100%; }
 }
 .skip-link:focus { top: 8px; }
 
-/* ============================================================
-   TOP IDENTITY BAR
-============================================================ */
 header {
   position: sticky;
-  top: 12px;
+  top: -1px;
   z-index: 100;
+  background: var(--cream);
+  padding-top: 24px;
+  padding-bottom: 24px;
+  margin-top: -24px;
 }
 .topbar {
   background: var(--paper);
@@ -128,7 +129,6 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
   gap: 16px;
   flex-wrap: wrap;
 }
